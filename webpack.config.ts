@@ -27,6 +27,11 @@ export default (env: EnvVariables) => {
         ].filter(Boolean),
         module: { // loaders, которые обрабатывают файлы с расширениями
             rules: [
+                // порядок имеет значение
+                {
+                    test: /\.css$/i,
+                    use: ["style-loader", "css-loader"],
+                },
                 {
                     // ts-loader умеет работать с JSX
                     // Если б не использовали ts, то нужен был бы babel-loader
