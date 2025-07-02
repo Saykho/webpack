@@ -2,6 +2,7 @@ import path from 'path';
 import webpack from 'webpack';
 import HtmlWebpackPlugin from "html-webpack-plugin";
 import type { Configuration as DevServerConfiguration } from 'webpack-dev-server';
+import MiniCssExtractPlugin from "mini-css-extract-plugin";
 
 type Mode = 'production' | 'development';
 
@@ -24,13 +25,21 @@ export default (env: EnvVariables) => {
         plugins: [
             new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'public', 'index.html') }), // подставляет скрипты, которые получаются в результате сборки, в index.html
             isDev && new webpack.ProgressPlugin(), // показывает в % на сколько прошла сборка
+            new MiniCssExtractPlugin(),
         ].filter(Boolean),
         module: { // loaders, которые обрабатывают файлы с расширениями
             rules: [
                 // порядок имеет значение
                 {
-                    test: /\.css$/i,
-                    use: ["style-loader", "css-loader"],
+                    test: /\.s[ac]ss$/i,
+                    use: [
+                        // Creates `style` nodes from JS strings
+                        "style-loader",
+                        // Translates CSS into CommonJS
+                        "css-loader",
+                        // Compiles Sass to CSS
+                        "sass-loader",
+                    ],
                 },
                 {
                     // ts-loader умеет работать с JSX
