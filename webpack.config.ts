@@ -7,22 +7,25 @@ type Mode = 'production' | 'development';
 
 interface EnvVariables {
     mode: Mode;
+    port: number;
 }
 
 export default (env: EnvVariables) => {
+    const isDev = env.mode === 'development';
+
     const config: webpack.Configuration = {
-        mode: env.mode ?? 'development',
-        entry: path.resolve(__dirname, 'src', 'index.ts'),
-        output: {
+        mode: env.mode ?? 'development', // mode = develop || prod
+        entry: path.resolve(__dirname, 'src', 'index.ts'), //entrypoint - путь до точки входа в наше приложение
+        output: { // указывает то, куда происходит сборка
             path: path.resolve(__dirname, 'build'),
-            filename: '[name].[contenthash].js',
+            filename: '[name].[contenthash].js', // для filename можно использовать шаблоны, чтобы избежать кэширования в браузере
             clean: true,
         },
         plugins: [
-            new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'public', 'index.html') }),
-            new webpack.ProgressPlugin(),
-        ],
-        module: {
+            new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'public', 'index.html') }), // подставляет скрипты, которые получаются в результате сборки, в index.html
+            isDev && new webpack.ProgressPlugin(), // показывает в % на сколько прошла сборка
+        ].filter(Boolean),
+        module: { // loaders, которые обрабатывают файлы с расширениями
             rules: [
                 {
                     test: /\.tsx?$/,
@@ -34,10 +37,11 @@ export default (env: EnvVariables) => {
         resolve: {
             extensions: ['.tsx', '.ts', '.js'],
         },
-        devServer: {
-            port: 5000,
+        devtool: isDev && 'inline-source-map',
+        devServer: isDev ? {
+            port: env.port ?? 3000,
             open: true,
-        },
+        } : undefined,
     };
 
     return config;
