@@ -15,7 +15,7 @@ export default (env: EnvVariables) => {
 
     const config: webpack.Configuration = {
         mode: env.mode ?? 'development', // mode = develop || prod
-        entry: path.resolve(__dirname, 'src', 'index.ts'), //entrypoint - путь до точки входа в наше приложение
+        entry: path.resolve(__dirname, 'src', 'index.tsx'), //entrypoint - путь до точки входа в наше приложение
         output: { // указывает то, куда происходит сборка
             path: path.resolve(__dirname, 'build'),
             filename: '[name].[contenthash].js', // для filename можно использовать шаблоны, чтобы избежать кэширования в браузере
@@ -28,6 +28,8 @@ export default (env: EnvVariables) => {
         module: { // loaders, которые обрабатывают файлы с расширениями
             rules: [
                 {
+                    // ts-loader умеет работать с JSX
+                    // Если б не использовали ts, то нужен был бы babel-loader
                     test: /\.tsx?$/,
                     use: 'ts-loader',
                     exclude: /node_modules/,
