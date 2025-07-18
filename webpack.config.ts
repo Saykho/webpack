@@ -1,68 +1,26 @@
 import path from 'path';
 import webpack from 'webpack';
-import HtmlWebpackPlugin from "html-webpack-plugin";
-import type { Configuration as DevServerConfiguration } from 'webpack-dev-server';
-import MiniCssExtractPlugin from "mini-css-extract-plugin";
+import {buildWebpack} from "./config/build/buildWebpack";
+import {BuildMode, BuildPaths} from "./config/build/types/types";
 
-type Mode = 'production' | 'development';
 
 interface EnvVariables {
-    mode: Mode;
+    mode: BuildMode;
     port: number;
 }
 
 export default (env: EnvVariables) => {
-    const isDev = env.mode === 'development';
-    const isProd = env.mode === 'production';
+    const paths: BuildPaths = {
+        output: path.resolve(__dirname, 'build'),
+        entry: path.resolve(__dirname, 'src', 'index.tsx'),
+        html: path.resolve(__dirname, 'public', 'index.html'),
+    }
 
-    const config: webpack.Configuration = {
-        mode: env.mode ?? 'development', // mode = develop || prod
-        entry: path.resolve(__dirname, 'src', 'index.tsx'), //entrypoint - путь до точки входа в наше приложение
-        output: { // указывает то, куда происходит сборка
-            path: path.resolve(__dirname, 'build'),
-            filename: '[name].[contenthash].js', // для filename можно использовать шаблоны, чтобы избежать кэширования в браузере
-            clean: true,
-        },
-        plugins: [
-            new HtmlWebpackPlugin({ template: path.resolve(__dirname, 'public', 'index.html') }), // подставляет скрипты, которые получаются в результате сборки, в index.html
-            isDev && new webpack.ProgressPlugin(), // показывает в % на сколько прошла сборка
-            isProd && new MiniCssExtractPlugin({
-                filename: 'css/[name].[contenthash:8].css',
-                chunkFilename: 'css/[name].[contenthash:8].css',
-            }),
-        ].filter(Boolean),
-        module: { // loaders, которые обрабатывают файлы с расширениями
-            rules: [
-                // порядок имеет значение
-                {
-                    test: /\.s[ac]ss$/i,
-                    use: [
-                        // Creates `style` nodes from JS strings
-                        isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
-                        // Translates CSS into CommonJS
-                        "css-loader",
-                        // Compiles Sass to CSS
-                        "sass-loader",
-                    ],
-                },
-                {
-                    // ts-loader умеет работать с JSX
-                    // Если б не использовали ts, то нужен был бы babel-loader
-                    test: /\.tsx?$/,
-                    use: 'ts-loader',
-                    exclude: /node_modules/,
-                },
-            ],
-        },
-        resolve: {
-            extensions: ['.tsx', '.ts', '.js'],
-        },
-        devtool: isDev && 'inline-source-map',
-        devServer: isDev ? {
-            port: env.port ?? 3000,
-            open: true,
-        } : undefined,
-    };
+    const config: webpack.Configuration = buildWebpack({
+        port: env.port ?? 3000,
+        mode: env.mode ?? 'development',
+        paths,
+    })
 
     return config;
 }
