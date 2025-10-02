@@ -1,13 +1,15 @@
-import {ModuleOptions} from "webpack";
+import { ModuleOptions } from "webpack";
 import MiniCssExtractPlugin from "mini-css-extract-plugin";
-import {BuildOptions} from "./types/types";
+import { BuildOptions } from "./types/types";
+import ReactRefreshTypeScript from "react-refresh-typescript";
+import { buildBabelLoader } from "./babel/builBabelLoader";
 
 export function buildLoaders(options: BuildOptions): ModuleOptions['rules'] {
     const isDev = options.mode === 'development';
 
     const assetLoader = {
-            test: /\.(png|jpg|jpeg|gif)$/i,
-            type: 'asset/resource',
+        test: /\.(png|jpg|jpeg|gif)$/i,
+        type: 'asset/resource',
     }
 
     const svgrLoader = {
@@ -54,13 +56,31 @@ export function buildLoaders(options: BuildOptions): ModuleOptions['rules'] {
         ],
     }
 
-    const tsloader = {
+    const tsLoader = {
         // ts-loader умеет работать с JSX
-        // Если б не использовали ts, то нужен был бы babel-loader
-        test: /\.tsx?$/,
-        use: 'ts-loader',
+        // Если б мы не использовали тайпскрипт: нужен был бы babel-loader
         exclude: /node_modules/,
+        test: /\.tsx?$/,
+        use: [
+            {
+                loader: 'ts-loader',
+                options: {
+                    transpileOnly: true,
+                    getCustomTransformers: () => ({
+                        before: [isDev && ReactRefreshTypeScript()].filter(Boolean),
+                    }),
+                }
+            }
+        ]
     }
 
-    return [assetLoader, scssLoader, tsloader, svgrLoader]
+    const babelLoader = buildBabelLoader(options);
+
+    return [
+        assetLoader,
+        scssLoader,
+        // tsLoader,
+        svgrLoader,
+        babelLoader
+    ]
 }

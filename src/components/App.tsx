@@ -12,6 +12,7 @@ export const App = () => {
 
     return (
         <div>
+            <h1>PLATFORM={__PLATFORM__}</h1>
             <div>
                 <img width={100} height={100} src={photo2} alt=""/>
                 <img width={100} height={100} src={photo1} alt=""/>
@@ -24,7 +25,8 @@ export const App = () => {
             <Link to={'/shop'}>shop</Link>
             <h1 className={classes.value}>{count}</h1>
             <button className={classes.button} onClick={increment}>increment</button>
-            <Outlet />
+            ffffffffffffddddddxxxxxxxxxxxxxxxxxxffffffffffffddddddddddddddddddd
+            <Outlet />ff
         </div>
     );
 };
